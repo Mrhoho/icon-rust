@@ -2,14 +2,14 @@
 
 Command line utility (Rust) for working with application icon files:
 
-* Extract PNG images from existing `.ico` (Windows) / `.icns` (macOS) files.
+* Extract the largest available PNG image from existing `.ico` (Windows) / `.icns` (macOS) files (simplified single-image extraction).
 * Build new `.ico` / `.icns` files either from a single high‑resolution source image or from a directory of images.
 
 ## Features
 
 | Command | Purpose |
 |---------|---------|
-| `extract` | Split an `.ico` / `.icns` file into individual PNG frames (saved as `<width>x<height>-<index>.png`). |
+| `extract` | Export only the largest image contained in an `.ico` / `.icns` file as `<width>x<height>.png`. |
 | `build` | Generate an `.ico` / `.icns` from a single source image, auto‑resizing to common sizes. |
 | `build-dir` | Generate an `.ico` / `.icns` using the largest image in a directory as the base (other files currently ignored). |
 
@@ -41,14 +41,14 @@ Show help:
 icon-rust --help
 ```
 
-### 1. Extract icons
+### 1. Extract largest icon image
 
 ```bash
 icon-rust extract path/to/app.ico output_dir
 icon-rust extract path/to/app.icns output_dir
 ```
 
-Result: PNG files like `16x16-0.png`, `32x32-1.png`, etc.
+Result: A single PNG named like `256x256.png` (size depends on source file). If multiple same-size variants exist, the one with highest bit depth is chosen.
 
 ### 2. Build from a single image
 
@@ -97,7 +97,7 @@ Behavior:
 
 ## Examples
 
-Extract Chromium icon:
+Extract Chromium icon (largest only):
 ```bash
 icon-rust extract chromium.ico out/
 ```
@@ -126,7 +126,8 @@ icon-rust build-dir assets icns dist/app.icns
 
 ## Limitations / Notes
 
-* ICNS extraction: only standard pixel sizes (16–1024) are probed; exotic icon types won't export.
+* Extraction now returns only the largest image (by area, then bit depth). Use an older revision if you need every size.
+* ICNS extraction: only standard pixel sizes (16–1024) are probed; exotic icon blocks not in that set are ignored.
 * `build-dir` currently ignores intermediate size files beyond using the largest; enhancement pending.
 * Only PNG/JPEG inputs supported (add formats by enabling more `image` crate features if needed).
 * Alpha transparency preserved; no color profile transformations performed.
